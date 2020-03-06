@@ -1,6 +1,7 @@
 import os
 import json
 import time
+import signal
 import subprocess
 import threading
 
@@ -13,10 +14,12 @@ class ModelThread(threading.Thread):
         self.url = model["url"]
         self.time = model["time"]
         self.handled = False
+        self.pid = None;
 
     def run(self):
         print("Thread: Starting thread for {}".format(self.name))
-        subprocess.run(["youtube-dl.exe", "-f", "best[height<=720]", "{}".format(self.url)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        p = subprocess.Popen(["youtube-dl", "-f", "best[height<=720]", "{}".format(self.url)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+        self.pid = p.pid
         # time.sleep(self.time)
         print("Thread: Stopping thread for {}".format(self.name))
 
@@ -69,9 +72,17 @@ if __name__ == "__main__":
                         x.start()
             # print(inactive_models)
             # print("active models: {}".format(active_models))
+
+            models = {}
+            with open(MODELS_FILE) as models_json:
+                models = json.load(models_json)
+            # list of model names
+            model_names = [m["name"] for m in models["models"]]
             time.sleep(60)
 
     except KeyboardInterrupt:
         print("Interrupted")
+        for thread in thread_list:
+            os.kill(thread.pid, signal.SIGINT)
 
     
