@@ -13,13 +13,13 @@ class ModelThread(threading.Thread):
         self.name = model["name"]
         self.url = model["url"]
         self.time = model["time"]
+        self.resolution = model["resolution"]
         self.handled = False
         self.pid = None;
 
     def run(self):
         print("Thread: Starting thread for {}".format(self.name))
-        p = subprocess.Popen(["youtube-dl", "-f", "best[height<=720]", "{}".format(self.url)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
-        self.pid = p.pid
+        subprocess.run(["youtube-dl.exe", "-f", "best[height<={}]".format(self.resolution), "{}".format(self.url)], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         # time.sleep(self.time)
         print("Thread: Stopping thread for {}".format(self.name))
 
